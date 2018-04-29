@@ -12,18 +12,16 @@ var Player   = require ('./originalmodules/dataformat').Player;
 //var Attack   = require ('./originalmodules/Attack');
 var Server   = require ('gwss');
 var AAJFormat = Server.AAJF; //データフォーマット
-//wsシングルトン
-var g = new Server ({port: 3000}); 
-
-
-//var attackInfo = [];
 
 var fs = require('fs');
 var http = require('http');
 var server = http.createServer(function(req, res) {
     res.writeHead(200, {'Content-Type' : 'text/html'});
     res.end(fs.readFileSync(__dirname + '/front/index.html', 'utf-8'));
-}).listen(5000); 
+}).listen(process.env.PORT || 5000);
+
+//wsシングルトン
+var g = new Server ({server: server}); 
 
 //情報配列
 

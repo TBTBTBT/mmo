@@ -30,7 +30,7 @@
 //=========================================================================
 
     var ws;
-    var host = window.document.location.host.replace(/:.*/, '');
+    var host = location.origin.replace(/^http/, 'ws');
     window.onload = function(){
         	//debug.init(document.getElementById("debug"));
             //debug.showHost();
@@ -38,7 +38,7 @@
         }
     function connect(){
         	if(ws == null){
-                ws = new WebSocket('ws://' + host + ':3000');
+                ws = new WebSocket(host);
                 ws.onmessage = (event) =>{
                     console.log(event);
                     var message = event.data;
