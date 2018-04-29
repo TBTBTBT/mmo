@@ -1,0 +1,25 @@
+{
+  "name": "mmo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "async-limiter": "^1.0.0",
+    "safe-buffer": "^5.1.2",
+    "ultron": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TBTBTBT/mmo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TBTBTBT/mmo/issues"
+  },
+  "homepage": "https://github.com/TBTBTBT/mmo#readme"
+}
