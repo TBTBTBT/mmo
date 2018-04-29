@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <title>MMO | SocketMMO</title>
+    <!--
+           
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ディスクリプション" />
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="タイトル" />
+    <meta property="og:image" content="/img/icon.png" />
+    <meta property="og:url" content="http://example.net/" />
+    <meta property="og:site_name" content="サイト名" />
+    <meta property="og:description" content="ディスクリプション" />
+    
+    <meta name="robots" content="noarchive">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico"> 
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    -->
+    <script>
+
+//=========================================================================
+//-------------------------------------------------------------------------
+//script
+//-------------------------------------------------------------------------
+//=========================================================================
+
+    var ws;
+    var host = window.document.location.host.replace(/:.*/, '');
+    window.onload = function(){
+        	//debug.init(document.getElementById("debug"));
+            //debug.showHost();
+            connect();
+        }
+    function connect(){
+        	if(ws == null){
+                ws = new WebSocket('ws://' + host + ':3000');
+                ws.onmessage = (event) =>{
+                    console.log(event);
+                    var message = event.data;
+                    //var object = JSON.parse(event.data);
+                    debugRecieve(message);
+                    }
+                }
+                ws.onerror   = (event) =>{
+                    console.log(event);
+                    addDebug("error at connection'"  + event.target.url +"'");
+                }
+
+    }
+    window.onerror = function(msg, url, line, col, error) {  
+        addDebug(msg);
+                
+    };
+    window.addEventListener("keydown", function (event) {
+     if (event.defaultPrevented) {
+        return; // Do nothing if the event was already processed
+     }
+     UpdateInput();
+    switch (event.key) {
+        case "ArrowDown":
+      // code for "down arrow" key press.
+         break;
+         case "ArrowUp":
+      // code for "up arrow" key press.
+        break;
+        case "ArrowLeft":
+      // code for "left arrow" key press       
+        break;
+        case "ArrowRight":
+      // code for "right arrow" key press.
+         break;
+        default:
+        return; // Quit when this doesn't handle the key event.
+  }
+
+  // Cancel the default action to avoid it being handled twice
+  event.preventDefault();
+}, true);
+
+    function UpdateInput(){
+        if(ws != null){
+            var input = {
+                type:"Input",
+                dir:0,
+                a:1,
+                b:0
+            }
+            ws.send(JSON.stringify(input));
+        }
+    }
+//=========================================================================
+//-------------------------------------------------------------------------
+//debug
+//-------------------------------------------------------------------------
+//=========================================================================
+
+    function debugRecieve(msg){
+
+        clearDebug();
+        addDebug(msg);
+    }
+    
+    function clearDebug(){
+        document.getElementById('debug').innerHTML ="";
+    }
+    function addDebug(msg){
+        document.getElementById('debug').innerHTML = "<p>" + msg + "</p>";
+    }
+//=========================================================================
+//-------------------------------------------------------------------------
+//endscript
+//-------------------------------------------------------------------------
+//=========================================================================
+
+    </script>
+  </head>
+  <body style="background:  #ccc;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+    socketDebugger
+    <div id="debug">
+
+    </div>
+  </body>
+</html>
