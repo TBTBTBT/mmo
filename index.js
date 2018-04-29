@@ -61,12 +61,16 @@ g.wss.server.on ('Input' , (id,data)          => { GetInput(id,data); });
 function update60(){
     //if(Object.keys(playerInfo).length > 0){
     if(InfoPlayerPos.length() > 0){
-        //g.broadcast(g.FormatData(g.AssocArrayToJSON(playerInfo)));
+        InfoInput.foreach((id) =>{
+            //位置を更新
+            InfoPlayerPos.array[id].update(InfoInput.array[id].dir);
+        });
         g.broadcast(InfoPlayerPos.getAAJFString());
-        //console.log('connection: '+ wss.clients.size);
     }
+
 }
 function update20(){
+
 
 }
 setInterval(update60,16);
@@ -88,6 +92,7 @@ function OnOpen(id,address,client){
 }
 function OnClose(id,address){
     InfoPlayerPos.deleteData(id);
+    InfoInput.deleteData(id);
     //debug
     console.log ("close  : "+id+" from : "+address);
 }

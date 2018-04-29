@@ -14,8 +14,10 @@ Format.Player.Pos = class {
 
     }
 
-    Update(params) {
-        
+    update(angle) {
+
+        this.param.x += Math.cos(angle * Math.PI / 180);
+        this.param.y += Math.sin(angle * Math.PI / 180);
     }
 }
 Format.Player.State = class {

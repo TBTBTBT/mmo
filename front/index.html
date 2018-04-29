@@ -40,10 +40,11 @@
         	if(ws == null){
                 ws = new WebSocket(host);
                 ws.onmessage = (event) =>{
-                    console.log(event);
+                    //console.log(event);
                     var message = event.data;
-                    //var object = JSON.parse(event.data);
-                    debugRecieve(message);
+                    var object = JSON.parse(event.data);
+                    debugRecieve("");
+                    debugJSON(object);
                     }
                 }
                 ws.onerror   = (event) =>{
@@ -60,18 +61,22 @@
      if (event.defaultPrevented) {
         return; // Do nothing if the event was already processed
      }
-     UpdateInput();
+    
     switch (event.key) {
         case "ArrowDown":
       // code for "down arrow" key press.
+       UpdateInput(90);
          break;
          case "ArrowUp":
+         UpdateInput(270);
       // code for "up arrow" key press.
         break;
         case "ArrowLeft":
+        UpdateInput(180);
       // code for "left arrow" key press       
         break;
         case "ArrowRight":
+        UpdateInput(0);
       // code for "right arrow" key press.
          break;
         default:
@@ -82,13 +87,15 @@
   event.preventDefault();
 }, true);
 
-    function UpdateInput(){
+    function UpdateInput(angle){
         if(ws != null){
             var input = {
                 type:"Input",
-                dir:0,
+                array:{
+                dir:angle,
                 a:1,
                 b:0
+            }
             }
             ws.send(JSON.stringify(input));
         }
@@ -104,12 +111,22 @@
         clearDebug();
         addDebug(msg);
     }
-    
+    function debugJSON(obj){
+        if(obj.type == "Player"){
+            addDebug(obj.type);
+            obj.array.forEach((element) => {
+               addDebug("[id : ' " + element.id + " ' , pos : ' " + element.data.param.x+" , "+ element.data.param.y + " ' ]");
+            });
+            
+
+        }
+    }
+
     function clearDebug(){
         document.getElementById('debug').innerHTML ="";
     }
     function addDebug(msg){
-        document.getElementById('debug').innerHTML = "<p>" + msg + "</p>";
+        document.getElementById('debug').innerHTML += "<div>" + msg + "</div>";
     }
 //=========================================================================
 //-------------------------------------------------------------------------
@@ -119,10 +136,11 @@
 
     </script>
   </head>
-  <body style="background:  #ccc;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
-    socketDebugger
+  <body ><!--style="background:  #ccc;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">-->
+    <code>socketDebugger
     <div id="debug">
 
     </div>
+    </code>
   </body>
 </html>
