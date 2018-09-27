@@ -8,6 +8,7 @@
 //=========================================================================
 
 var Player   = require ('./originalmodules/dataformat').Player;
+var FirstInfo = require ('./originalmodules/dataformat').FirstInfo;
 //var Input    = require ('./originalmodules/dataformat').Input;
 //var Attack   = require ('./originalmodules/Attack');
 var Server   = require ('gwss');
@@ -25,10 +26,10 @@ var g = new Server ({server: server});
 
 //情報配列
 
-var InfoPlayerPos = new AAJFormat("Player");//out rate 60/1sec
+var InfoPlayerPos = new AAJFormat("PlayerPos");//out rate 60/1sec
 var InfoPlayerState =  new AAJFormat("PlayerState");
 var InfoInput  = new AAJFormat("Input"); //in  on   keydown
-//var InfoAttack = new AAJFormat("Attack");//out rate 20/1sec
+var InfoAttack = new AAJFormat("Attack");//out rate 20/1sec
 //var playerInfo = [];
 //=========================================================================
 //-------------------------------------------------------------------------
@@ -64,17 +65,25 @@ function update60(){
         InfoInput.foreach((id) =>{
             //位置を更新
             InfoPlayerPos.array[id].update(InfoInput.array[id].dir);
+            if(InfoInput.array[id].a){
+                
+            }
         });
         g.broadcast(InfoPlayerPos.getAAJFString());
     }
 
 }
 function update20(){
-
-
+    if(InfoPlayerState.length() > 0){
+        InfoInput.foreach((id) =>{
+            InfoPlayerState.array[id].param.state = "wait";
+            InfoPlayerState.array[id].param.charge = 0;
+        });
+    }
+    g.broadcast(InfoPlayerState.getAAJFString());
 }
-setInterval(update60,16);
-
+setInterval(update60,33);
+setInterval(update20,50);
 
 //=========================================================================
 //-------------------------------------------------------------------------
@@ -84,14 +93,23 @@ setInterval(update60,16);
 
 
 function OnOpen(id,address,client){
+    //データ初期化 
     InfoPlayerPos.addData(id,new Player.Pos());
-    client.send(InfoPlayerPos.getAAJFString());//最初のデータ送信 
+    InfoPlayerState.addData(id,new Player.State());
+    var InfoFirst = new AAJFormat("FirstInfo"); 
+    InfoFirst.addData(id,new FirstInfo());
+    //最初のデータ送信 
+    client.send(InfoFirst.getAAJFString());
+    delete InfoFirst;
+    //client.send(InfoPlayerPos.getAAJFString());
     //debug
     console.log ("open   : "+id+" from : "+address);
 
 }
 function OnClose(id,address){
+    //データ削除 
     InfoPlayerPos.deleteData(id);
+    InfoPlayerState.deleteData(id);
     InfoInput.deleteData(id);
     //debug
     console.log ("close  : "+id+" from : "+address);

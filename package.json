@@ -8,7 +8,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start":"node index.js"
+    "start":"node matching.js & node client.js"
   },
   "repository": {
     "type": "git",
