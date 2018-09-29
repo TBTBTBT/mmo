@@ -1,14 +1,28 @@
 var Connection = require('connection');
 
 var PORT = 3000;
-
-class ClientManager extends Connection{
+//client state list
+/*
+Connect
+Wait
+Match
+Exit
+*/
+var CF = class ClientFormat{
+	constructor(client,state){
+		this.client = client;
+		this.state = state;
+	}
+}
+var CM = class ClientManager extends Connection{
 	constructor(data){
 		super(data);
-		this.clients = [];
+		this.clients = {};
 	}
 	onOpen(id,client,req){
 		console.log('client connected id:' + id);
+		this.clients[id] = new CF(client,'connect');
+		console.log('clients length :' + Object.keys(this.clients).length);
 		super.broadcast(id);
 	}
 	onMessage(id,message){
@@ -16,6 +30,7 @@ class ClientManager extends Connection{
 		
 	}
 	onClose(id,address){
+		delete this.clients[id];
 		console.log('client disconnected id:' + id);
 		
 	}
@@ -28,9 +43,9 @@ class ClientManager extends Connection{
 		var send = [];
 	}
 }
-class MatchingServer{
+var MS = class MatchingServer{
 	constructor(data){
-		this.server  = new ClientManager(data);
+		this.server  = new CM(data);
 		//this.clients = new ClientManager();
 		//this.server.event.on('open', (id,client,req) =>{});
 		this.state = 'init';
@@ -43,4 +58,4 @@ class MatchingServer{
 
 
 }
-var ms = new MatchingServer({port:PORT});
+var ms = new MS({port:PORT});
