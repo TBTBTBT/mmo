@@ -23,7 +23,8 @@ var CM = class ClientManager extends Connection{
 		console.log('client connected id:' + id);
 		this.clients[id] = new CF(client,'connect');
 		console.log('clients length :' + Object.keys(this.clients).length);
-		super.broadcast(id);
+		this.sendConnectionCallback(id,client);
+		//super.broadcast(id);
 	}
 	onMessage(id,message){
 		console.log('message from id:' + id + ' : ' + message);
@@ -37,6 +38,13 @@ var CM = class ClientManager extends Connection{
 	onError(e){
 		console.log(e);
 		
+	}
+	sendConnectionCallback(id,client){
+		var send = {};
+		send.type = 'connect';
+		send.data = {};
+		send.data.id = id;
+		super.send(client,JSON.stringify(send));
 	}
 	sendGameServerAddress(){
 		//roomId + address

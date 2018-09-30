@@ -20,17 +20,20 @@
 </body>
 
 </html>
+
+
+
 <script type="text/javascript">
 	var HOST = 'ws://' + window.document.location.host.replace(/:.*/, '') + ':3000'
 	class Debug {
 		static setTarget(target){
 			this.target = target;
 		}
-		static log(log){
+		static log(log,color = "#000000"){
 			if(this.target === undefined || this.target === null){
 				this.target = document.body;
 			}
-			this.target.innerHTML +='<p>' + log + '</p>';
+			this.target.innerHTML +='<p style = " color: '+ color +' ">' + log + '</p>';
 		}
 
 	}
@@ -45,15 +48,19 @@
 				return;
 			}
 			this.ws = new WebSocket(this.address);
+			this.ws.onopen = this.onOpen;
 			this.ws.onmessage = this.onMessage;
 			this.ws.onerror = this.onError;
 			Debug.log("connecting...");
 		}
-		onConnect(){
-			Debug.log("connect.");
+		onOpen(event){
+			console.log(event.data);
+			Debug.log("connect.","#FF8C00");
 		}
 		onMessage(event){
-            	Debug.log(/*JSON.parse(*/(event));
+			console.log(event.data);
+			var obj = JSON.parse(event.data)
+            Debug.log("message : " + event.data);
 		}
 		onError(event){
 			Debug.log("error");
