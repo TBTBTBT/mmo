@@ -68,4 +68,5 @@ var MS = class MatchingServer{
 
 
 }
-var ms = new MS({server: HTTPserver(WS_PORT)});
+HTTPserver(WS_PORT)
+var ms = new MS({port:3000 });
