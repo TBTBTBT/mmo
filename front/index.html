@@ -24,7 +24,7 @@
 
 
 <script type="text/javascript">
-	var HOST = 'ws://' + window.document.location.host.replace(/:.*/, '') + ':3000'
+	var HOST =  location.origin.replace(/^http/, 'ws');//'ws://' + window.document.location.host.replace(/:.*/, '');// + ':3000'
 	class Debug {
 		static setTarget(target){
 			this.target = target;
