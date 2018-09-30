@@ -37,6 +37,10 @@
 		}
 
 	}
+function getByteLength(str){
+  str = (str==null)?"":str;
+  return encodeURI(str).replace(/%../g, "*").length;
+}
 	class MatchingClient{
 		initialize(address){
 			Debug.log("web socket server address : " + address);
@@ -54,13 +58,13 @@
 			Debug.log("connecting...");
 		}
 		onOpen(event){
-			console.log(event.data);
+			console.log(event);
 			Debug.log("connect.","#FF8C00");
 		}
 		onMessage(event){
-			console.log(event.data);
+			console.log(event);
 			var obj = JSON.parse(event.data)
-            Debug.log("message : " + event.data);
+            Debug.log("message : " + event.data + " size :" + getByteLength(event.data) + "byte");
 		}
 		onError(event){
 			Debug.log("error");
