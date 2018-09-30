@@ -1,6 +1,8 @@
 var Connection = require('connection');
+var HTTPserver = require('./client.js');
 
-var PORT = 3000;
+var WS_PORT = 3000;
+
 //client state list
 /*
 Connect
@@ -66,4 +68,4 @@ var MS = class MatchingServer{
 
 
 }
-var ms = new MS({port:PORT});
+var ms = new MS({server: HTTPserver(WS_PORT)});
