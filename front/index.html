@@ -24,7 +24,18 @@
 
 
 <script type="text/javascript">
-	var HOST =  location.origin.replace(/^http/, 'ws');//'ws://' + window.document.location.host.replace(/:.*/, '');// + ':3000'
+//-------------------------------------------------------------
+//define
+//-------------------------------------------------------------
+	var HOST =  location.origin.replace(/^http/, 'ws');
+
+//-------------------------------------------------------------
+//class
+//-------------------------------------------------------------
+	function getByteLength(str){
+  		str = (str==null)?"":str;
+  		return encodeURI(str).replace(/%../g, "*").length;
+	}
 	class Debug {
 		static setTarget(target){
 			this.target = target;
@@ -37,11 +48,10 @@
 		}
 
 	}
-function getByteLength(str){
-  str = (str==null)?"":str;
-  return encodeURI(str).replace(/%../g, "*").length;
-}
-	class MatchingClient{
+	class MatchingClient extends WebSocket{
+		constructor(data){
+			super(data);
+		}
 		initialize(address){
 			Debug.log("web socket server address : " + address);
 			this.address = address;
@@ -58,22 +68,45 @@ function getByteLength(str){
 			Debug.log("connecting...");
 		}
 		onOpen(event){
+			var req = {};
+			req.id = "test";
+
+			this.sendJSON('connect',req);
 			console.log(event);
 			Debug.log("connect.","#FF8C00");
 		}
 		onMessage(event){
+			var res = JSON.parse(event.data);
+
 			console.log(event);
-			var obj = JSON.parse(event.data)
             Debug.log("message : " + event.data + " size :" + getByteLength(event.data) + "byte");
 		}
 		onError(event){
 			Debug.log("error");
 		}
+		sendJSON(type,data){
+			var format = this.format(type,data);
+			var message = JSON.stringify(format);
+			this.ws.send(message);
+			Debug.log("send : " + message);
+		}
+		format(type,data){
+			var obj = {};
+			obj.type = type;
+			obj.data = data;
+			console.log(obj);
+			return obj;
+		}
 
 	}
+//-------------------------------------------------------------
+//entry
+//-------------------------------------------------------------
+
 	Debug.setTarget(document.getElementById("debug"));
 	console.log("test");
 	var mc = new MatchingClient();
 	mc.initialize(HOST);
 	mc.reqConnect();
+
 </script>

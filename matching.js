@@ -19,8 +19,28 @@ var CF = class ClientFormat{
 var CM = class ClientManager extends Connection{
 	constructor(data){
 		super(data);
+		this.define();
 		this.clients = {};
+
 	}
+	//メッセージタイプによる振る舞いの定義
+	define(){
+        this.behaviour = {
+            connect: (data) => msgConnect(data),
+            entryname:(data)=> msgEntryName(data),
+            chat: 	 (data) => msgChat(data)
+        }
+    }
+    msgConnect(data){
+    	console.log('client connected ');
+    }
+    msgEntryName(data){
+    	console.log('client connected name');
+    }
+    msgChat(data){
+    	
+    }
+    //コールバック
 	onOpen(id,client,req){
 		console.log('client connected id:' + id);
 		this.clients[id] = new CF(client,'connect');
@@ -30,6 +50,8 @@ var CM = class ClientManager extends Connection{
 	}
 	onMessage(id,message){
 		console.log('message from id:' + id + ' : ' + message);
+		//var res = JSON.parse(message);
+		//this.behaviour[res.type](res.data);
 		
 	}
 	onClose(id,address){
