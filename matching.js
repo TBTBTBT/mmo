@@ -19,42 +19,34 @@ var CF = class ClientFormat{
 var CM = class ClientManager extends Connection{
 	constructor(data){
 		super(data);
-		this.define();
 		this.clients = {};
-
+		this.define();
 	}
-	//メッセージタイプによる振る舞いの定義
+
+	//define
 	define(){
-        this.behaviour = {
-            connect: (data) => msgConnect(data),
-            entryname:(data)=> msgEntryName(data),
-            chat: 	 (data) => msgChat(data)
-        }
-    }
-    msgConnect(data){
-    	console.log('client connected ');
-    }
-    msgEntryName(data){
-    	console.log('client connected name');
-    }
-    msgChat(data){
-    	
-    }
-    //コールバック
+		this.response = {
+			connect: this.resConnect
+		}
+	}
+	resConnect(id,data){
+		var name = data.name;
+		console.log('client on stage named :' + name);
+	}
 	onOpen(id,client,req){
-		console.log('client connected id:' + id);
 		this.clients[id] = new CF(client,'connect');
-		console.log('clients length :' + Object.keys(this.clients).length);
 		this.sendConnectionCallback(id,client);
+		console.log('client connected id:' + id);
+		console.log('clients length :' + Object.keys(this.clients).length);
+
 		//super.broadcast(id);
 	}
-	onMessage(id,message){
+	onMessage(id,client,message){
+		var obj = JSON.parse(message);
+		this.response[obj.type](id,obj.data);
 		console.log('message from id:' + id + ' : ' + message);
-		//var res = JSON.parse(message);
-		//this.behaviour[res.type](res.data);
-		
 	}
-	onClose(id,address){
+	onClose(id,client,address){
 		delete this.clients[id];
 		console.log('client disconnected id:' + id);
 		
@@ -73,6 +65,12 @@ var CM = class ClientManager extends Connection{
 	sendGameServerAddress(){
 		//roomId + address
 		var send = [];
+	}
+	broadcastEncount(name){
+		var send = {};
+		send.type = 'encount';
+		send.data = {};
+		send.data.id = id;
 	}
 }
 var MS = class MatchingServer{

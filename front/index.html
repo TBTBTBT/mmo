@@ -49,10 +49,8 @@
 
 	}
 	class MatchingClient extends WebSocket{
-		constructor(data){
-			super(data);
-		}
-		initialize(address){
+		constructor(address){
+			super(address);
 			Debug.log("web socket server address : " + address);
 			this.address = address;
 		}
@@ -61,15 +59,14 @@
 			if(this.address === null){
 				return;
 			}
-			this.ws = new WebSocket(this.address);
-			this.ws.onopen = this.onOpen;
-			this.ws.onmessage = this.onMessage;
-			this.ws.onerror = this.onError;
+			this.onopen = this.onOpen;
+			this.onmessage = this.onMessage;
+			this.onerror = this.onError;
 			Debug.log("connecting...");
 		}
 		onOpen(event){
 			var req = {};
-			req.id = "test";
+			req.name = "test";
 
 			this.sendJSON('connect',req);
 			console.log(event);
@@ -85,17 +82,12 @@
 			Debug.log("error");
 		}
 		sendJSON(type,data){
-			var format = this.format(type,data);
-			var message = JSON.stringify(format);
-			this.ws.send(message);
-			Debug.log("send : " + message);
-		}
-		format(type,data){
 			var obj = {};
 			obj.type = type;
 			obj.data = data;
-			console.log(obj);
-			return obj;
+			var message = JSON.stringify(obj);
+			this.send(message);
+			Debug.log("send : " + message);
 		}
 
 	}
@@ -105,8 +97,7 @@
 
 	Debug.setTarget(document.getElementById("debug"));
 	console.log("test");
-	var mc = new MatchingClient();
-	mc.initialize(HOST);
+	var mc = new MatchingClient(HOST);
 	mc.reqConnect();
 
 </script>
