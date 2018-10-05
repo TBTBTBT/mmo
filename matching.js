@@ -15,9 +15,10 @@ class ClientFormat{
 	constructor(client,state){
 		this.client = client;
 		this.state = state;
+		this.room = '';
 	}
 }
-class ClientManager extends Connection{
+class MatchingServer extends Connection{
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //constructor
@@ -25,6 +26,7 @@ class ClientManager extends Connection{
 		super(data);
 		this.clients = {};
 		this.define();
+		this.startUpdate();
 	}
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -37,14 +39,15 @@ class ClientManager extends Connection{
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //responce
-	resConnect(id,data){
+	resConnect(self,id,data){
 		var name = data.name;
 
 		console.log('client on stage named :' + name);
+		self.clients[id].state = 'entry';
 	}
-	resEntry(id,data){
+	resEntry(self,id,data){
 		
-		this.clients[id].state = 'entry';
+		self.clients[id].state = 'entry';
 	}
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -69,7 +72,7 @@ class ClientManager extends Connection{
 	}
 	onMessage(id,client,message){
 		var obj = JSON.parse(message);
-		this.response[obj.type](id,obj.data);
+		this.response[obj.type](this,id,obj.data);
 		console.log('message from id:' + id + ' : ' + message);
 	}
 	onClose(id,client,address){
@@ -91,6 +94,14 @@ class ClientManager extends Connection{
 		send.data.id = id;
 		super.send(client,JSON.stringify(send));
 	}
+	sendMatchingInfo(id,client){
+		var send = {};
+		send.type = 'match';
+		send.data = {};
+		send.data.address = "ws://";
+		send.data.room = this.clients[id].room;
+		super.send(client,JSON.stringify(send));
+	}
 	//omit
 	/*
 	broadcastRollCall(){
@@ -100,42 +111,71 @@ class ClientManager extends Connection{
 		send.data = {};
 		send.data.id = id;
 	}*/
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+//matchingLogic
+	matchingLogic(clients){
+		var group = [];
+		var num = 2;
+		group.push([]);
+		for (var id in clients){
+			if(clients[id].state == 'wait'){
+				if(group[group.length - 1].length < num){
+						group[group.length - 1].push(id);
+				}
+				else{
+					group.push([id]);
+				}
 
+			}
+		}
+		
+		for (var i = 0 ; i < group.length; i ++){
+			if(group[i].length == num){
+			var roomId = group[i][0];
+				for (var j = 0 ; j < group[i].length; j ++){
+					clients[group[i][j]].state = 'match';
+					clients[group[i][j]].room  = roomId;
+				}
+			}
+		}
+		console.log(group);
+		console.log(" group make " + group.length);
+	}
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //update
 	updateClientState(){
-		this.clients.ForEach(
-			function each(c){
-				if(c.state == 'entry'){
-					c.state = 'wait';
-				}
-			});
-	}
-	update
-	updateMatching(){
-		this.clients.ForEach(
-			function each(c){
-				if(c.state == 'wait'){
-					
-				}
-			});
-	}
-}
-class MatchingServer{
-	constructor(data){
-		this.server  = new ClientManager(data);
-		//this.clients = new ClientManager();
-		//this.server.event.on('open', (id,client,req) =>{});
-		this.state = 'init';
-		//this.update(1000);
-	} 
-	startUpdate(self){
-		self.update(1000);
-	}
-	update(tick){
-		this.updateMatching();
-	}
 
+		for (var id in this.clients){
+			if(this.clients[id].state == 'entry'){
+				this.clients[id].state = 'wait';
+			}
+		}
+		console.log(" update clients :" + Object.keys(this.clients).length);
+	}
+	updateMatching(){
+		this.matchingLogic(this.clients);
+		for (var id in this.clients){
+			if(this.clients[id].state == 'match'){
+				console.log(" matching :" + id);
+				this.sendMatchingInfo(id,this.clients[id].client);
+					
+			}
+		}
+		console.log(" update matching :" + Object.keys(this.clients).length);
+	}
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+	startUpdate(){
+		var my = this;
+		setInterval(function(){my.update(my);}, 1000);
+	}
+	update(self){
+		self.updateClientState();
+		self.updateMatching();
+		
+	}
 }
+
 var ms = new MatchingServer({server: HTTPserver(WS_PORT)});
