@@ -63,7 +63,7 @@ var websocket;
 	function onOpen(event){
 		var req = {};
 		req.name = "test";
-		websocket.sendJSON('connect',req);
+		sendJSON('connect',req);
 		Debug.log("connect.","#FF8C00");
 	}
 	function onMessage(event){
@@ -92,9 +92,9 @@ var websocket;
 	function Init(){
 		Debug.log("request connect");
 		websocket = new WebSocket(HOST);
-		websocket.onopen = onOpen();
-		websocket.onmessage = onMessage();
-		websocket.onerror = onError();
+		websocket.onopen = onOpen;
+		websocket.onmessage = onMessage;
+		websocket.onerror = onError;
 		Debug.log("web socket server address : " + address);
 
 	}
