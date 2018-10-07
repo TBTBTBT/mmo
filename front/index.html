@@ -94,10 +94,16 @@
 //-------------------------------------------------------------
 //entry
 //-------------------------------------------------------------
-
-	Debug.setTarget(document.getElementById("debug"));
-	var mc = new MatchingClient(HOST);
+ 	Debug.setTarget(document.getElementById("debug"));
 	Debug.log("request connect b");
+window.onload = function() {
+ 
+    // 実行したい処理を書く
+
+	var mc = new MatchingClient(HOST);
+
 	mc.reqConnect();
+}
+	
 
 </script>
