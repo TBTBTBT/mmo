@@ -27,11 +27,17 @@
 //-------------------------------------------------------------
 //define
 //-------------------------------------------------------------
-	var HOST =  location.origin.replace(/^http/, 'ws');
+var HOST =  location.origin.replace(/^http/, 'ws');
+
+//-------------------------------------------------------------
+//global
+//-------------------------------------------------------------
+var websocket;
 
 //-------------------------------------------------------------
 //class
 //-------------------------------------------------------------
+
 	function getByteLength(str){
   		str = (str==null)?"":str;
   		return encodeURI(str).replace(/%../g, "*").length;
@@ -48,16 +54,72 @@
 		}
 
 	}
+//-------------------------------------------------------------
+//functions
+//-------------------------------------------------------------
+//古い端末ではなぜかstaticめそっどしか使えないのでクラス化は断念(おそらくECMA2015に対応していない)
+
+//callback
+	function onOpen(event){
+		var req = {};
+		req.name = "test";
+		websocket.sendJSON('connect',req);
+		Debug.log("connect.","#FF8C00");
+	}
+	function onMessage(event){
+		var res = JSON.parse(event.data);
+
+		console.log(event);
+        Debug.log("message : " + event.data + " size :" + getByteLength(event.data) + "byte");
+	}
+	function onError(event){
+		Debug.log("error");
+	}
+//request
+	function sendJSON(type,data){
+		var obj = {};
+		obj.type = type;
+		obj.data = data;
+		var message = JSON.stringify(obj);
+		websocket.send(message);
+		Debug.log("send : " + message);
+		
+	}
+	function reqEntry(name){
+		
+	}
+
+	function Init(){
+		Debug.log("request connect");
+		websocket = new WebSocket(HOST);
+		websocket.onopen = onOpen();
+		websocket.onmessage = onMessage();
+		websocket.onerror = onError();
+		Debug.log("web socket server address : " + address);
+
+	}
+//-------------------------------------------------------------
+//entry
+//-------------------------------------------------------------
+ 	Debug.setTarget(document.getElementById("debug"));
+	Debug.log("request connect b");
+	window.onload = function() {
+ 
+    	Init();
+	//var mc = new MatchingClient(HOST);
+	//Debug.log(JSON.stringify(mc));
+	//Debug.log(mc.reqConnect);
+	//Debug.log(MatchingClient.reqConnect);
+	//Debug.log(MatchingClient.test);
+	}
+	/*
 	class MatchingClient extends WebSocket{
 		constructor(address){
 			super(address);
-			Debug.log("web socket server address : " + address);
+			
 			this.address = address;
 			//es6対応
 			//this.
-		}
-		static test(){
-
 		}
 		reqConnect(){
 			Debug.log("request connect");
@@ -95,22 +157,8 @@
 			Debug.log("send : " + message);
 		}
 
-	}
-//-------------------------------------------------------------
-//entry
-//-------------------------------------------------------------
- 	Debug.setTarget(document.getElementById("debug"));
-	Debug.log("request connect b");
-window.onload = function() {
- 
-    // 実行したい処理を書く
+	}*/
 
-	var mc = new MatchingClient(HOST);
-	Debug.log(JSON.stringify(mc));
-	Debug.log(mc.reqConnect);
-	Debug.log(MatchingClient.reqConnect);
-	Debug.log(MatchingClient.test);
-}
 	
 
 </script>
