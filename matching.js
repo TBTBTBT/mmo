@@ -1,9 +1,10 @@
 var Connection = require('connection');
+var WebSocketClient = require('ws');
 var HTTPserver = require('./client.js');
 //GlobalDefine
 var WS_PORT = 3000;
-
-
+var WS_GAMESERVER = 'ws://localhost:4000';
+//var WS_GAMESERVER = 'wss://'
 class ClientFormat{
 	constructor(client,state){
 		this.client = client;
@@ -41,6 +42,10 @@ class MatchingServer extends Connection{
 //---------------------------------------------------------------------
 //マッチングロジック
 	matchingLogic(clients){
+		//ゲームサーバー存在チェック
+		if(this.gameServer === undefined){
+			return;
+		}
 		var group = [];
 		var num = 2;
 		group.push([]);
@@ -55,11 +60,14 @@ class MatchingServer extends Connection{
 
 			}
 		}
-		
+
 		for (var i = 0 ; i < group.length; i ++){
 			if(group[i].length == num){
 			var roomId = group[i][0];
+			//ゲームサーバーにリクエスト
+			this.gsreqCreateRoom(roomId);
 				for (var j = 0 ; j < group[i].length; j ++){
+
 					clients[group[i][j]].state = 'match';
 					clients[group[i][j]].room  = roomId;
 				}
@@ -77,7 +85,12 @@ class MatchingServer extends Connection{
 //クライアントからのmessageのtypeに対するレスポンス定義
 	responseDefine(){
 		this.response = {
-			connect: this.resConnect
+			connect: this.resConnect,
+			
+		}
+		this.gsResponse = {
+			connect: this.gsresConnect,
+			gscreate: this.gsresCreateRoom
 		}
 	}
 //---------------------------------------------------------------------
@@ -155,7 +168,7 @@ class MatchingServer extends Connection{
 		var send = {};
 		send.type = 'match';
 		send.data = {};
-		send.data.address = "ws://";
+		send.data.address = WS_GAMESERVER;
 		send.data.room = this.clients[id].room;
 		super.send(client,JSON.stringify(send));
 	}
@@ -181,6 +194,51 @@ class MatchingServer extends Connection{
 		return isStop;
 	}
 //---------------------------------------------------------------------
+//connection gameServer
+	gsConnect(self){
+		console.log("[ game ] connecting gameserver..." );
+		this.gameServer = new WebSocketClient();
+		this.gameServer.on('message',self.gsOnMessage);
+		this.gameServer.connect(WS_GAMESERVER, 'echo-protocol');
+
+		console.log("[ game ] connect gameserver. " );
+	}
+	gsOnMessage(event){
+		var obj = JSON.parse(event.data);
+		this.gsResponse[obj.type](this,'',obj.data);
+		console.log('[ client ] message from id:' + id + ' : ' + message);
+	}
+
+	gsresConnect(self,data){
+		var obj = {};
+		obj.type = 'suconnect';
+		var message = JSON.stringify(obj);
+		this.gameServer.send(message);
+	}
+	gsresCreateRoom(self,data){
+		var room = data.room;
+		for (var id in this.clients){
+			if(this.clients[id].state != 'match'){
+				continue;
+			}
+
+			if(this.clients[id].room != room){
+				continue;
+			}
+			this.sendMatchingInfo(id,this.clients[id].client);
+			console.log(" matching :" + id);
+			this.clients[id].state = 'exit';
+		}
+	}	
+
+	gsreqCreateRoom(room){
+		var obj = {};
+		obj.data = {};
+		obj.type = 'sumakeroom';
+		obj.data.room = room;
+		var message = JSON.stringify(obj);
+		this.gameServer.send(message);
+	}
 //---------------------------------------------------------------------
 //update
 	updateClientState(){
@@ -192,15 +250,15 @@ class MatchingServer extends Connection{
 		}
 		console.log("[ update ] update clients :" + Object.keys(this.clients).length);
 	}
+	updateConnectionGameServer(){
+		if(this.gameServer !== undefined){
+			return;
+		}
+		this.gsConnect(this);
+	}
 	updateMatching(){
 		this.matchingLogic(this.clients);
-		for (var id in this.clients){
-			if(this.clients[id].state == 'match'){
-				console.log(" matching :" + id);
-				this.sendMatchingInfo(id,this.clients[id].client);
-				this.clients[id].state = 'exit';
-			}
-		}
+
 		console.log("[ update ] update matching :" + Object.keys(this.clients).length);
 	}
 //---------------------------------------------------------------------
@@ -218,6 +276,7 @@ class MatchingServer extends Connection{
 		this.timer = undefined;
 	}
 	update(self){
+		self.updateConnectionGameServer();
 		self.updateClientState();
 		self.updateMatching();
 		
