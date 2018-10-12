@@ -3,6 +3,7 @@ var WebSocketClient = require('ws');
 var HTTPserver = require('./client.js');
 //GlobalDefine
 var WS_PORT = 3000;
+var MATCH_NUM = 2;
 var WS_GAMESERVER = 'ws://localhost:4000';
 //var WS_GAMESERVER = 'wss://'
 class ClientFormat{
@@ -20,13 +21,6 @@ class ClientFormat{
   		return this._state
   	}
 }
-class ResponseFormat{
-	constructor(){
-		this.response ={
-
-		};
-	}
-}
 //---------------------------------------------------------------------
 //MatchingServer
 //抽象化したい関数を上から順に書く
@@ -42,12 +36,8 @@ class MatchingServer extends Connection{
 //---------------------------------------------------------------------
 //マッチングロジック
 	matchingLogic(clients){
-		//ゲームサーバー存在チェック
-		if(this.gameServer === undefined){
-			return;
-		}
 		var group = [];
-		var num = 2;
+		var num = MATCH_NUM ;
 		group.push([]);
 		for (var id in clients){
 			if(clients[id].state == 'wait'){
@@ -65,7 +55,7 @@ class MatchingServer extends Connection{
 			if(group[i].length == num){
 			var roomId = group[i][0];
 			//ゲームサーバーにリクエスト
-			this.gsreqCreateRoom(roomId);
+			//this.gsreqCreateRoom(roomId);
 				for (var j = 0 ; j < group[i].length; j ++){
 
 					clients[group[i][j]].state = 'match';
@@ -88,10 +78,11 @@ class MatchingServer extends Connection{
 			connect: this.resConnect,
 			
 		}
+		/*
 		this.gsResponse = {
 			connect: this.gsresConnect,
 			gscreate: this.gsresCreateRoom
-		}
+		}*/
 	}
 //---------------------------------------------------------------------
 //response
@@ -195,6 +186,7 @@ class MatchingServer extends Connection{
 	}
 //---------------------------------------------------------------------
 //connection gameServer
+/*
 	gsConnect(self){
 		console.log("[ game ] connecting gameserver..." );
 		this.gameServer = new WebSocketClient();
@@ -239,6 +231,7 @@ class MatchingServer extends Connection{
 		var message = JSON.stringify(obj);
 		this.gameServer.send(message);
 	}
+	*/
 //---------------------------------------------------------------------
 //update
 	updateClientState(){
@@ -250,15 +243,23 @@ class MatchingServer extends Connection{
 		}
 		console.log("[ update ] update clients :" + Object.keys(this.clients).length);
 	}
+	/*
 	updateConnectionGameServer(){
 		if(this.gameServer !== undefined){
 			return;
 		}
 		this.gsConnect(this);
-	}
+	}*/
 	updateMatching(){
 		this.matchingLogic(this.clients);
-
+		for (var id in this.clients){
+			if(this.clients[id].state != 'match'){
+				continue;
+			}
+			this.sendMatchingInfo(id,this.clients[id].client);
+			console.log(" matching :" + id);
+			this.clients[id].state = 'exit';
+		}
 		console.log("[ update ] update matching :" + Object.keys(this.clients).length);
 	}
 //---------------------------------------------------------------------
@@ -276,7 +277,7 @@ class MatchingServer extends Connection{
 		this.timer = undefined;
 	}
 	update(self){
-		self.updateConnectionGameServer();
+		//self.updateConnectionGameServer();
 		self.updateClientState();
 		self.updateMatching();
 		
