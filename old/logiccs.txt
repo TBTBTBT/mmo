@@ -1,0 +1,68 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class GunnerData
+{
+    public int id;
+    public int x;
+    public int y;
+    public int hp;
+
+}
+
+public class BulletData
+{
+    public int sx;
+    public int sy;
+    public int gravx;
+    public int gravy;
+    public int weight;//‘¬‚³‚É‰e‹¿
+    public int atk;
+    public int atkRatio;
+    public int rad;
+    public int radRatio;
+    public int expRad;
+}
+public class InputData
+{
+    public int id;
+    public int type;
+    public int strength;
+    public int angle;
+}
+public class Logic
+{
+    //server‚ªŒvZ‚·‚é•K—v‚·‚ç‚È‚¢‚©‚à
+    //define
+    private float SPF = 0.2f;//1ŒvZf‚ ‚½‚è‚ÌŒo‰ß•b”
+    //data
+    private int _frameCount = 0;
+    private List<InputData> _log = new List<InputData>();
+
+    public float CalcTime(int frame)
+    {
+        return SPF * frame;
+    }
+    public void CalcOrbit(float time , InputData input,GunnerData gunner,BulletData bullet)
+    {
+        var gx = bullet.gravx;
+        var gy = bullet.gravy;
+        var wei = bullet.weight;
+        var sx = gunner.x;
+        var sy = gunner.y;
+        var str = input.strength;
+        var ang = input.angle;
+
+    }
+    public void CalcFrame()
+    {
+        _frameCount++;
+
+    }
+
+    public void OnGUI()
+    {
+
+    }
+}
