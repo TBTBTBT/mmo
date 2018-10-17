@@ -131,7 +131,9 @@ class MatchingServer extends Connection{
 	}
 	onMessage(id,client,message){
 		var obj = JSON.parse(message);
-		this.response[obj.type](this,id,obj.data);
+		if(this.response[obj.type]){
+			this.response[obj.type](this,id,obj.data);
+		}
 		console.log('[ client ] message from id:' + id + ' : ' + message);
 	}
 	onClose(id,client,address){
