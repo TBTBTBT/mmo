@@ -4,8 +4,8 @@ var HTTPserver = require('./client.js');
 //GlobalDefine
 var WS_PORT = 3000;
 var MATCH_NUM = 2;
-var WS_GAMESERVER = 'ws://localhost:4000';
-//var WS_GAMESERVER = 'wss://'
+//var WS_GAMESERVER = 'ws://localhost:4000';
+var WS_GAMESERVER = 'wss://gamemain.herokuapp.com'
 class ClientFormat{
 	constructor(client,state){
 		this.client = client;
